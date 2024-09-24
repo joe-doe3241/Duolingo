@@ -186,7 +186,7 @@ const Leaderboard: NextPage = () => {
                 {leaderboardUsers.map((user, i) => {
                   return (
                     <LeaderboardProfile
-                      key={user.name}
+                      key={user.name + i} 
                       place={i + 1}
                       name={user.name}
                       xp={user.xp}

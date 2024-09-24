@@ -4,18 +4,12 @@ import Link from "next/link";
 import React, { useRef, useState } from "react";
 import {
   AppleSvg,
-  BigCloseSvg,
   BoySvg,
-  CloseSvg,
-  DoneSvg,
+  WomanSvg,
   LessonFastForwardEndFailSvg,
   LessonFastForwardEndPassSvg,
   LessonFastForwardStartSvg,
-  LessonTopBarEmptyHeart,
-  LessonTopBarHeart,
-  WomanSvg,
 } from "~/components/Svgs";
-import womanPng from "../../public/woman.png";
 import { useBoundStore } from "~/hooks/useBoundStore";
 import { useRouter } from "next/router";
 
@@ -43,19 +37,6 @@ const numbersEqual = (a: readonly number[], b: readonly number[]): boolean => {
   return a.length === b.length && a.every((_, i) => a[i] === b[i]);
 };
 
-const formatTime = (timeMs: number): string => {
-  const seconds = Math.floor(timeMs / 1000) % 60;
-  const minutes = Math.floor(timeMs / 1000 / 60) % 60;
-  const hours = Math.floor(timeMs / 1000 / 60 / 60);
-  if (hours === 0)
-    return [minutes, seconds]
-      .map((x) => x.toString().padStart(2, "0"))
-      .join(":");
-  return [hours, minutes, seconds]
-    .map((x) => x.toString().padStart(2, "0"))
-    .join(":");
-};
-
 const Lesson: NextPage = () => {
   const router = useRouter();
 
@@ -67,18 +48,15 @@ const Lesson: NextPage = () => {
   const [quitMessageShown, setQuitMessageShown] = useState(false);
 
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
-
   const startTime = useRef(Date.now());
-  const endTime = useRef(startTime.current + 1000 * 60 * 3 + 1000 * 33);
 
   const [questionResults, setQuestionResults] = useState<QuestionResult[]>([]);
   const [reviewLessonShown, setReviewLessonShown] = useState(false);
 
   const problem = lessonProblems[lessonProblem] ?? lessonProblem1;
-
   const totalCorrectAnswersNeeded = 2;
-
   const [isStartingLesson, setIsStartingLesson] = useState(true);
+
   const hearts =
     "fast-forward" in router.query &&
     !isNaN(Number(router.query["fast-forward"]))
@@ -103,7 +81,7 @@ const Lesson: NextPage = () => {
         question: problem.question,
         yourResponse:
           problem.type === "SELECT_1_OF_3"
-            ? problem.answers[selectedAnswer ?? 0]?.name ?? ""
+            ? (problem.answers[selectedAnswer ?? 0]?.name ?? "")
             : selectedAnswers.map((i) => problem.answerTiles[i]).join(" "),
         correctResponse:
           problem.type === "SELECT_1_OF_3"
@@ -120,7 +98,6 @@ const Lesson: NextPage = () => {
     setSelectedAnswers([]);
     setCorrectAnswerShown(false);
     setLessonProblem((x) => (x + 1) % lessonProblems.length);
-    endTime.current = Date.now();
   };
 
   const onSkip = () => {
@@ -132,7 +109,7 @@ const Lesson: NextPage = () => {
 
   if (hearts !== null && hearts < 0 && !correctAnswerShown) {
     return (
-      <LessonFastForwardEndFail
+      <LessonFastForwardEndFailSvg
         unitNumber={unitNumber}
         reviewLessonShown={reviewLessonShown}
         setReviewLessonShown={setReviewLessonShown}
@@ -148,7 +125,7 @@ const Lesson: NextPage = () => {
     correctAnswerCount >= totalCorrectAnswersNeeded
   ) {
     return (
-      <LessonFastForwardEndPass
+      <LessonFastForwardEndPassSvg
         unitNumber={unitNumber}
         reviewLessonShown={reviewLessonShown}
         setReviewLessonShown={setReviewLessonShown}
@@ -159,7 +136,7 @@ const Lesson: NextPage = () => {
 
   if (hearts !== null && isStartingLesson) {
     return (
-      <LessonFastForwardStart
+      <LessonFastForwardStartSvg
         unitNumber={unitNumber}
         setIsStartingLesson={setIsStartingLesson}
       />
@@ -172,7 +149,6 @@ const Lesson: NextPage = () => {
         correctAnswerCount={correctAnswerCount}
         incorrectAnswerCount={incorrectAnswerCount}
         startTime={startTime}
-        endTime={endTime}
         reviewLessonShown={reviewLessonShown}
         setReviewLessonShown={setReviewLessonShown}
         questionResults={questionResults}
@@ -262,7 +238,7 @@ const ProgressBar = ({
         <div
           className={
             "h-full rounded-full bg-green-500 transition-all duration-700 " +
-            (correctAnswerCount > 0 ? "px-2 pt-1 " : "")
+            (correctAnswerCount > 0 ? "px-2 pt-1" : "")
           }
           style={{
             width: `${(correctAnswerCount / totalCorrectAnswersNeeded) * 100}%`,
